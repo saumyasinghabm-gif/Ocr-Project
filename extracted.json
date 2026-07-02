@@ -1,0 +1,237 @@
+{
+  "invoice_header": {
+    "invoice_number": "FL-JUN-611",
+    "document_type": "Original",
+    "invoice_date": "15-Jun-2026"
+  },
+  "sender_details": {
+    "name": "JYOTI GUPTA FL2 & FL2B LUCKNOW",
+    "address": "FL2-Depot-Gindan Khera Nadar Ganj Lucknow",
+    "tin_number": "09450064887S",
+    "pan_number": "APPPG2190F"
+  },
+  "recipient_details": {
+    "name": "ATUL KUMAR JAISWAL- PR-58-26-27",
+    "pan_it_number": null
+  },
+  "line_items": [
+    {
+      "item_number": 1,
+      "description": "Bacardi Limon Super Claassic Rum-375 ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 9159.12,
+      "rate_unit": "C.S",
+      "amount": 9159.12
+    },
+    {
+      "item_number": 2,
+      "description": "Bacardi Limon Super Claassic Rum-180 ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 9445.44,
+      "rate_unit": "C.S",
+      "amount": 9445.44
+    },
+    {
+      "item_number": 3,
+      "description": "Bacardi Mango Chilli Claassic Rum-375 ML",
+      "quantity": 2.0,
+      "quantity_unit": "C.S",
+      "rate": 9159.12,
+      "rate_unit": "C.S",
+      "amount": 18318.24
+    },
+    {
+      "item_number": 4,
+      "description": "Bacardi Mango Chilli Claassic Rum-180 ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 9445.44,
+      "rate_unit": "C.S",
+      "amount": 9445.44
+    },
+    {
+      "item_number": 5,
+      "description": "Black & White Celebration EditionScotch-180 ML PET",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 18672.48,
+      "rate_unit": "C.S",
+      "amount": 18672.48
+    },
+    {
+      "item_number": 6,
+      "description": "Black Dog Centenary Whisky-750 ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 16881.36,
+      "rate_unit": "C.S",
+      "amount": 16881.36
+    },
+    {
+      "item_number": 7,
+      "description": "Black Dog Centenary Whisky-180 ML PET",
+      "quantity": 2.0,
+      "quantity_unit": "C.S",
+      "rate": 16820.64,
+      "rate_unit": "C.S",
+      "amount": 33641.28
+    },
+    {
+      "item_number": 8,
+      "description": "BORA BORA CANBERRY PRE VODKA 180 ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 9000.96,
+      "rate_unit": "C.S",
+      "amount": 9000.96
+    },
+    {
+      "item_number": 9,
+      "description": "BORA BORA PREMIUM VODKA 180 ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 8543.52,
+      "rate_unit": "C.S",
+      "amount": 8543.52
+    },
+    {
+      "item_number": 10,
+      "description": "Dewar's \"White Label\" Scotch Whisky Platinum -375ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 18854.64,
+      "rate_unit": "C.S",
+      "amount": 18854.64
+    },
+    {
+      "item_number": 11,
+      "description": "M2 MAGIC MOMENTS JAMUN SPICYMINT FLAVOURED 750 ML",
+      "quantity": 2.0,
+      "quantity_unit": "C.S",
+      "rate": 7553.76,
+      "rate_unit": "C.S",
+      "amount": 15107.52
+    },
+    {
+      "item_number": 12,
+      "description": "M2 MAGIC MOMENTS JAMUN SPICYMINT FLAVOURED 375 ML",
+      "quantity": 2.0,
+      "quantity_unit": "C.S",
+      "rate": 7793.76,
+      "rate_unit": "C.S",
+      "amount": 15587.52
+    },
+    {
+      "item_number": 13,
+      "description": "M2 MAGIC MOMENTS JAMUN SPICYMINT 180 ML PET",
+      "quantity": 2.0,
+      "quantity_unit": "C.S",
+      "rate": 8077.44,
+      "rate_unit": "C.S",
+      "amount": 16154.88
+    },
+    {
+      "item_number": 14,
+      "description": "M.M.Verve Green Apple Vodka-375ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 8482.08,
+      "rate_unit": "C.S",
+      "amount": 8482.08
+    },
+    {
+      "item_number": 15,
+      "description": "M.M.Verve Green Apple Vodka-180ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 9006.72,
+      "rate_unit": "C.S",
+      "amount": 9006.72
+    },
+    {
+      "item_number": 16,
+      "description": "M.M.Verve Pre.Vodka-180 ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 8550.72,
+      "rate_unit": "C.S",
+      "amount": 8550.72
+    },
+    {
+      "item_number": 17,
+      "description": "The Rockford Imperial Reserve Exceptional Blended 750 Ml",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 14454.36,
+      "rate_unit": "C.S",
+      "amount": 14454.36
+    },
+    {
+      "item_number": 18,
+      "description": "The Rockford Imperial Reserve Exceptional Blended 375 Ml",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 14694.48,
+      "rate_unit": "C.S",
+      "amount": 14694.48
+    },
+    {
+      "item_number": 19,
+      "description": "The Rockford Imperial Reserve Exceptional Blended 180 Ml",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 14509.92,
+      "rate_unit": "C.S",
+      "amount": 14509.92
+    },
+    {
+      "item_number": 20,
+      "description": "Smirnoff Minty Jamun Triple Distilled Vodka 750ML",
+      "quantity": 3.0,
+      "quantity_unit": "C.S",
+      "rate": 10070.52,
+      "rate_unit": "C.S",
+      "amount": 30211.56
+    },
+    {
+      "item_number": 21,
+      "description": "Smirnoff Minty Jamun Triple Distil. Vodka 180ML PET",
+      "quantity": 3.0,
+      "quantity_unit": "C.S",
+      "rate": 10839.36,
+      "rate_unit": "C.S",
+      "amount": 32518.08
+    },
+    {
+      "item_number": 22,
+      "description": "Snoski Classic Craf Vodka Masala Jamun 750 ML",
+      "quantity": 1.0,
+      "quantity_unit": "C.S",
+      "rate": 7555.92,
+      "rate_unit": "C.S",
+      "amount": 7555.92
+    },
+    {
+      "item_number": 23,
+      "description": "Snoski Classic Craf Vodka Masala Jamun 180 Ml Pet",
+      "quantity": 2.0,
+      "quantity_unit": "C.S",
+      "rate": 8079.36,
+      "rate_unit": "C.S",
+      "amount": 16158.72
+    }
+  ],
+  "summary": {
+    "subtotal_amount": 354954.96,
+    "tcs_payable_on_sale_percentage": 2.0,
+    "tcs_payable_on_sale_amount": 7099.1,
+    "round_off_amount": 0.94,
+    "total_quantity_cases": 33.0,
+    "total_amount_chargeable": 362055.0,
+    "amount_chargeable_in_words": "Indian Rupees Three Lakh Sixty Two Thousand Fifty Five Only"
+  },
+  "declaration": "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
+  "is_computer_generated": true
+}
