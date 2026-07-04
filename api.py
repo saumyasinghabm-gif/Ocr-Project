@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import json
+import sys
 from pathlib import Path
 from typing import Optional
 import uvicorn
@@ -43,48 +44,34 @@ async def process_ocr(file: UploadFile = File(...)):
         with open(temp_path, "wb") as buffer:
             buffer.write(await file.read())
 
-        # Check if extracted.json exists
-        extracted_path = Path('extracted.json')
-        if extracted_path.exists():
-            with open(extracted_path, 'r') as f:
-                result = json.load(f)
-        else:
-            # Return sample data if extracted.json doesn't exist
+        # Process the uploaded file using main.py OCR function
+        try:
+            # Add the current directory to Python path so we can import main
+            sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+            # Import the OCR function from main.py
+            from main import process_ocr_from_file
+
+            # Call the OCR processing function with the uploaded file path
+            ocr_result = process_ocr_from_file(temp_path)
+
+            # Check if extracted.json was created by the OCR process
+            extracted_path = Path('extracted.json')
+            if extracted_path.exists():
+                with open(extracted_path, 'r') as f:
+                    result = json.load(f)
+            else:
+                # If no extracted.json, return the direct OCR result
+                result = ocr_result
+
+        except Exception as e:
             result = {
-                "invoice_number": "SAMPLE-123",
-                "invoice_date": "01-Jul-2026",
-                "invoice_type": "Original",
-                "seller_details": {
-                    "name": "Sample Vendor",
-                    "address": "123 Business Street",
-                    "tin": "12345678901",
-                    "pan": "ABCDE1234F"
-                },
-                "buyer_details": {
-                    "name": "Sample Customer",
-                    "pan_it_number": None
-                },
-                "line_items": [
-                    {
-                        "s_no": 1,
-                        "description": "Sample Product 1 - 500 ML",
-                        "quantity": 2.0,
-                        "unit": "PCS",
-                        "rate": 1000.00,
-                        "amount": 2000.00
-                    }
-                ],
-                "summary": {
-                    "subtotal_amount": 2000.00,
-                    "tcs_payable": None,
-                    "round_off_amount": 0.00,
-                    "total_quantity": 2.0,
-                    "total_amount_words": "Indian Rupees Two Thousand Only",
-                    "total_amount_numeric": 2000.00
-                },
-                "declaration": "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
-                "notes": ["This is a Computer Generated Invoice"]
+                "error": f"Error processing OCR: {str(e)}",
+                "filename": file.filename,
+                "status": "error",
+                "details": str(e)
             }
+            print(f"OCR Processing Error: {e}")
 
         # Clean up the temporary file
         if os.path.exists(temp_path):

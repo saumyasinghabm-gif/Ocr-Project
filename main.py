@@ -216,35 +216,51 @@ data_schema = {
     "additionalProperties": False
 }
 
-# Upload
-file_obj = client.files.create(file="./document.pdf", purpose="extract")
+# Upload - now accepts file path as parameter
+import sys
 
-# Submit an extract job
-job = client.extract.create(
-    file_input=file_obj.id,
-    configuration={
-        "data_schema": data_schema,
-        "tier": "agentic",
-        "extraction_target": "per_doc",
-        "parse_tier": "agentic",
-        "cite_sources": True,
-        "confidence_scores": True
-    },
-)
+def process_ocr_from_file(file_path="./document.pdf"):
+    try:
+        file_obj = client.files.create(file=file_path, purpose="extract")
 
-# Poll until the job reaches a terminal state
-while job.status not in ("COMPLETED", "FAILED", "CANCELLED"):
-    time.sleep(2)
-    job = client.extract.get(job.id)
+        # Submit an extract job
+        job = client.extract.create(
+            file_input=file_obj.id,
+            configuration={
+                "data_schema": data_schema,
+                "tier": "agentic",
+                "extraction_target": "per_doc",
+                "parse_tier": "agentic",
+                "cite_sources": True,
+                "confidence_scores": True
+            },
+        )
 
-if job.status != "COMPLETED":
-    raise RuntimeError(f"Extract job {job.id} ended in {job.status}: {job.error_message}")
+        # Poll until the job reaches a terminal state
+        while job.status not in ("COMPLETED", "FAILED", "CANCELLED"):
+            time.sleep(2)
+            job = client.extract.get(job.id)
 
-# Persist extracted JSON to disk
-Path("extracted.json").write_text(json.dumps(job.extract_result, indent=2))
-print(json.dumps(job.extract_result, indent=2))
+        if job.status != "COMPLETED":
+            raise RuntimeError(f"Extract job {job.id} ended in {job.status}: {job.error_message}")
 
-# Per-field citation / confidence metadata
-if job.extract_metadata and job.extract_metadata.field_metadata:
-    for field, meta in (job.extract_metadata.field_metadata.document_metadata or {}).items():
-        print(f"{field}: {meta}")
+        # Persist extracted JSON to disk
+        Path("extracted.json").write_text(json.dumps(job.extract_result, indent=2))
+        print(json.dumps(job.extract_result, indent=2))
+
+        # Per-field citation / confidence metadata
+        if job.extract_metadata and job.extract_metadata.field_metadata:
+            for field, meta in (job.extract_metadata.field_metadata.document_metadata or {}).items():
+                print(f"{field}: {meta}")
+
+        return job.extract_result
+
+    except Exception as e:
+        print(f"Error processing OCR: {e}")
+        raise
+
+# Main execution
+if __name__ == "__main__":
+    # Check if a file path was provided as argument
+    file_path = sys.argv[1] if len(sys.argv) > 1 else "./document.pdf"
+    process_ocr_from_file(file_path)
