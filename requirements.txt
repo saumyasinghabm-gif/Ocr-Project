@@ -5,3 +5,9 @@ numpy
 torch
 torchvision
 pytesseract
+llama-cloud
+python-dotenv
+fastapi
+uvicorn
+python-multipart
+pydantic

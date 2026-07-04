@@ -1,93 +1,250 @@
-import easyocr
 import json
+import time
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+from llama_cloud import LlamaCloud
 
-reader = easyocr.Reader(['th','en'], gpu = False)
+# Load environment variables
+load_dotenv()
 
+# Get API key from environment variables
+api_key = os.getenv("LLAMA_CLOUD_API_KEY")
+if not api_key:
+    raise ValueError("LLAMA_CLOUD_API_KEY environment variable not set")
 
-text = reader.readtext('images/wp.jpeg', detail = 0)
-print(text)
+client = LlamaCloud(api_key=api_key)
 
-# Save the extracted text to a professional JSON structure
-def convert_to_serializable(obj):
-    if hasattr(obj, 'flatten'):
-        return list(map(int, obj.flatten()))
-    elif isinstance(obj, (list, tuple)):
-        return [convert_to_serializable(item) for item in obj]
-    elif hasattr(obj, 'item'):
-        return int(obj.item())
-    else:
-        return obj
-
-# Organize OCR results into a clean API-ready structure (key-value pairs only)
-def organize_invoice_data(ocr_results):
-    invoice_data = {
-        "invoice_number": None,
-        "invoice_date": None,
-        "vendor_name": None,
-        "vendor_tax_ids": [],
-        "customer_name": None,
-        "customer_address": None,
-        "items": [],
-        "total_amount": None,
-        "total_amount_words": None,
-        "currency": "INR",
-        "processing_metadata": {
-            "timestamp": "2026-06-30T13:30:00",
-            "language": "thai-english",
-            "total_detections": len(ocr_results)
+# Schema from playground
+data_schema = {
+    "type": "object",
+    "properties": {
+        "invoice_number": {
+            "description": "The unique identifier for the invoice.",
+            "type": "string"
+        },
+        "invoice_date": {
+            "description": "The date when the invoice was issued. Format: DDMon-YYYY (e.g., 15Jun-2026).",
+            "type": "string"
+        },
+        "invoice_type": {
+            "description": "The type of invoice, e.g., 'Original'.",
+            "anyOf": [{
+                "description": "The type of invoice, e.g., 'Original'.",
+                "type": "string"
+            }, {
+                "type": "null"
+            }]
+        },
+        "seller_details": {
+            "description": "Details of the seller or company issuing the invoice.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "The full name of the seller company.",
+                    "type": "string"
+                },
+                "address": {
+                    "description": "The address of the seller company.",
+                    "anyOf": [{
+                        "description": "The address of the seller company.",
+                        "type": "string"
+                    }, {
+                        "type": "null"
+                    }]
+                },
+                "tin": {
+                    "description": "The Taxpayer Identification Number (TIN) of the seller.",
+                    "type": "string"
+                },
+                "pan": {
+                    "description": "The Permanent Account Number (PAN) of the seller company.",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "address", "tin", "pan"],
+            "additionalProperties": False
+        },
+        "buyer_details": {
+            "description": "Details of the buyer or customer receiving the invoice.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "The full name of the buyer or customer.",
+                    "type": "string"
+                },
+                "pan_it_number": {
+                    "description": "The PAN or Income Tax number of the buyer, if available.",
+                    "anyOf": [{
+                        "description": "The PAN or Income Tax number of the buyer, if available.",
+                        "type": "string"
+                    }, {
+                        "type": "null"
+                    }]
+                }
+            },
+            "required": ["name", "pan_it_number"],
+            "additionalProperties": False
+        },
+        "line_items": {
+            "description": "A list of individual goods or services included in the invoice.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "s_no": {
+                        "description": "The serial number of the line item.",
+                        "type": "number"
+                    },
+                    "description": {
+                        "description": "A detailed description of the goods or service.",
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "description": "The quantity of the item.",
+                        "type": "number"
+                    },
+                    "unit": {
+                        "description": "The unit of measurement for the quantity, e.g., 'C.S' (Cases).",
+                        "anyOf": [{
+                            "description": "The unit of measurement for the quantity, e.g., 'C.S' (Cases).",
+                            "type": "string"
+                        }, {
+                            "type": "null"
+                        }]
+                    },
+                    "rate": {
+                        "description": "The unit rate of the item.",
+                        "type": "number"
+                    },
+                    "amount": {
+                        "description": "The total amount for this line item (quantity * rate).",
+                        "type": "number"
+                    }
+                },
+                "required": ["s_no", "description", "quantity", "unit", "rate", "amount"],
+                "additionalProperties": False
+            }
+        },
+        "summary": {
+            "description": "Summary of all financial calculations on the invoice.",
+            "type": "object",
+            "properties": {
+                "subtotal_amount": {
+                    "description": "The total amount of all line items before taxes and round-off.",
+                    "type": "number"
+                },
+                "tcs_payable": {
+                    "description": "Details regarding Tax Collected at Source (TCS) payable.",
+                    "anyOf": [{
+                        "description": "Details regarding Tax Collected at Source (TCS) payable.",
+                        "type": "object",
+                        "properties": {
+                            "percentage": {
+                                "description": "The percentage rate of TCS applied.",
+                                "type": "number"
+                            },
+                            "amount": {
+                                "description": "The calculated amount of TCS payable.",
+                                "type": "number"
+                            }
+                        },
+                        "required": ["percentage", "amount"],
+                        "additionalProperties": False
+                    }, {
+                        "type": "null"
+                    }]
+                },
+                "round_off_amount": {
+                    "description": "The amount rounded off for the final total.",
+                    "anyOf": [{
+                        "description": "The amount rounded off for the final total.",
+                        "type": "number"
+                    }, {
+                        "type": "null"
+                    }]
+                },
+                "total_quantity": {
+                    "description": "The sum of quantities of all items, if available.",
+                    "anyOf": [{
+                        "description": "The sum of quantities of all items, if available.",
+                        "type": "number"
+                    }, {
+                        "type": "null"
+                    }]
+                },
+                "total_amount_words": {
+                    "description": "The total amount chargeable written in words.",
+                    "anyOf": [{
+                        "description": "The total amount chargeable written in words.",
+                        "type": "string"
+                    }, {
+                        "type": "null"
+                    }]
+                },
+                "total_amount_numeric": {
+                    "description": "The final total amount chargeable, including taxes and adjustments.",
+                    "type": "number"
+                }
+            },
+            "required": ["subtotal_amount", "tcs_payable", "round_off_amount", "total_quantity", "total_amount_words", "total_amount_numeric"],
+            "additionalProperties": False
+        },
+        "declaration": {
+            "description": "Any declaration or legal text provided on the invoice.",
+            "anyOf": [{
+                "description": "Any declaration or legal text provided on the invoice.",
+                "type": "string"
+            }, {
+                "type": "null"
+            }]
+        },
+        "notes": {
+            "description": "General notes or statements on the invoice, such as 'This is a Computer Generated Invoice'.",
+            "anyOf": [{
+                "description": "General notes or statements on the invoice, such as 'This is a Computer Generated Invoice'.",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }, {
+                "type": "null"
+            }]
         }
-    }
+    },
+    "required": ["invoice_number", "invoice_date", "invoice_type", "seller_details", "buyer_details", "line_items", "summary", "declaration", "notes"],
+    "additionalProperties": False
+}
 
-    # Extract key information from OCR results
-    for item in ocr_results:
-        text = item[1].strip()
-        confidence = float(item[2])
+# Upload
+file_obj = client.files.create(file="./document.pdf", purpose="extract")
 
-        # Clean up text
-        clean_text = ' '.join(text.split())
+# Submit an extract job
+job = client.extract.create(
+    file_input=file_obj.id,
+    configuration={
+        "data_schema": data_schema,
+        "tier": "agentic",
+        "extraction_target": "per_doc",
+        "parse_tier": "agentic",
+        "cite_sources": True,
+        "confidence_scores": True
+    },
+)
 
-        # Extract invoice header information
-        if "invoice" in clean_text.lower() and "no" in clean_text.lower() and invoice_data["invoice_number"] is None:
-            invoice_data["invoice_number"] = clean_text.replace("invoice no.", "").strip()
-        elif any(month in clean_text.lower() for month in ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]) and invoice_data["invoice_date"] is None:
-            invoice_data["invoice_date"] = clean_text
+# Poll until the job reaches a terminal state
+while job.status not in ("COMPLETED", "FAILED", "CANCELLED"):
+    time.sleep(2)
+    job = client.extract.get(job.id)
 
-        # Extract vendor information
-        elif ("tin" in clean_text.lower() or "pan" in clean_text.lower()) and len(clean_text) > 5:
-            if clean_text not in invoice_data["vendor_tax_ids"]:
-                invoice_data["vendor_tax_ids"].append(clean_text)
+if job.status != "COMPLETED":
+    raise RuntimeError(f"Extract job {job.id} ended in {job.status}: {job.error_message}")
 
-        # Extract customer information
-        elif any(keyword in clean_text.lower() for keyword in ["fl2", "depot", "lucknow", "ganj"]) and invoice_data["customer_address"] is None:
-            invoice_data["customer_address"] = clean_text
+# Persist extracted JSON to disk
+Path("extracted.json").write_text(json.dumps(job.extract_result, indent=2))
+print(json.dumps(job.extract_result, indent=2))
 
-        # Extract items (products)
-        elif any(keyword in clean_text.lower() for keyword in ["bacardi", "black & white", "dewar's", "smirnoff", "magic moments", "rockford", "vodka", "whisky", "rum", "scotch", "750 ml", "375 ml", "180 ml"]):
-            # Check if this is a product description (not just a brand name)
-            if len(clean_text.split()) > 2 and ("ml" in clean_text or "l" in clean_text):
-                invoice_data["items"].append({
-                    "description": clean_text,
-                    "confidence": confidence
-                })
-
-        # Extract total amounts
-        elif "total" in clean_text.lower() and invoice_data["total_amount"] is None:
-            invoice_data["total_amount"] = clean_text.replace("total", "").strip()
-        elif "rupees" in clean_text.lower() and invoice_data["total_amount_words"] is None:
-            invoice_data["total_amount_words"] = clean_text
-
-    # Clean up extracted data
-    if invoice_data["vendor_tax_ids"]:
-        invoice_data["vendor_tax_ids"] = [tax_id.strip() for tax_id in invoice_data["vendor_tax_ids"]]
-
-    return invoice_data
-
-with open('output/result.json', 'w', encoding='utf-8') as f:
-    organized_data = organize_invoice_data(text)
-    json.dump(organized_data, f, indent=2, ensure_ascii=False)
-
-print("\nProfessional OCR results saved to output/result.json")
-print(f"Total detections: {len(text)}")
-print("Data organized into structured invoice format")
-
-
+# Per-field citation / confidence metadata
+if job.extract_metadata and job.extract_metadata.field_metadata:
+    for field, meta in (job.extract_metadata.field_metadata.document_metadata or {}).items():
+        print(f"{field}: {meta}")
